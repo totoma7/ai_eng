@@ -3,3 +3,5 @@
 docs/.bkit-memory.json
 docs/.pdca-status.json
 .DS_Store
+prd.json
+progress.txt

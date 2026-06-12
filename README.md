@@ -25,6 +25,16 @@ AI 에이전트 시대의 엔지니어링 기법을 주제별로 리서치하고
 **🎨 [인터랙티브 도식화 페이지 (index.html)](docs/loop-engineering/index.html)**
 — 전체 내용을 한 장의 다이어그램으로 정리한 HTML 버전. 로컬에서 열거나(`open docs/loop-engineering/index.html`) GitHub Pages로 서빙해서 볼 수 있습니다.
 
+## 🛠 실습 (Practice)
+
+| 실습 | 내용 |
+|------|------|
+| [ralph-loop](practice/ralph-loop/README.md) | 검증 가능한 목표 명세 → ralph식 루프 직접 구현. 버그 2개짜리 샘플을 에이전트 루프가 자동 수렴시키고, 무진행 감지·반복 상한 가드레일을 재현한다. |
+
+```bash
+cd practice/ralph-loop && ./ralph.sh   # 2회 반복 후 게이트 통과
+```
+
 ## 🔑 핵심 인용
 
 > "코딩 에이전트에게 프롬프트하지 마라. 에이전트에게 프롬프트를 주는 **루프를 설계**하라."
