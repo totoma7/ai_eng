@@ -386,6 +386,38 @@ footer a{color:var(--cyan);text-decoration:none}
 footer a:hover{text-decoration:underline}
 .stamp{margin-top:30px;font-family:var(--mono);font-size:.68rem;color:var(--text-dim)}
 
+/* ---------- access gate ---------- */
+body:not(.unlocked) nav,
+body:not(.unlocked) main{display:none}
+#gate{
+  position:fixed;inset:0;z-index:100;display:none;
+  align-items:center;justify-content:center;background:var(--ink);
+}
+#gate.show{display:flex}
+.gate-box{
+  width:min(420px,90vw);border:1px solid var(--line);border-radius:12px;
+  background:var(--panel);padding:40px 36px;text-align:center;
+  box-shadow:0 0 60px rgba(255,180,84,.06);
+}
+.gate-box .glogo{font-family:var(--mono);font-weight:600;color:var(--amber);letter-spacing:.08em;font-size:.9rem}
+.gate-box h2{font-size:1.15rem;margin:14px 0 6px}
+.gate-box p{font-size:.8rem;color:var(--text-dim);margin-bottom:22px}
+.gate-box input{
+  width:100%;background:var(--ink);border:1px solid var(--line);border-radius:6px;
+  color:var(--text);font-family:var(--mono);font-size:.85rem;
+  padding:12px 14px;outline:none;text-align:center;
+}
+.gate-box input:focus{border-color:var(--cyan)}
+.gate-box button{
+  width:100%;margin-top:12px;padding:12px;border:none;border-radius:6px;
+  background:var(--amber);color:var(--ink);font-family:var(--mono);font-weight:600;
+  font-size:.85rem;letter-spacing:.08em;cursor:pointer;
+}
+.gate-box button:hover{background:var(--amber-deep)}
+.gate-err{display:none;margin-top:12px;font-family:var(--mono);font-size:.72rem;color:var(--red)}
+.gate-err.show{display:block}
+.gate-note{margin-top:18px;font-family:var(--mono);font-size:.62rem;color:var(--text-dim)}
+
 /* responsive */
 @media (max-width:880px){
   .hero{grid-template-columns:1fr;gap:60px}
@@ -410,6 +442,18 @@ footer a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
+
+<div id="gate" role="dialog" aria-label="접근 확인">
+  <form class="gate-box" id="gateForm">
+    <div class="glogo">LOOP·ENG_</div>
+    <h2>접근 확인</h2>
+    <p>이 페이지를 보려면 등록된 ID(이메일)를 입력하세요.</p>
+    <input type="email" id="gateId" placeholder="id@example.com" autocomplete="email" required>
+    <button type="submit">ENTER</button>
+    <div class="gate-err" id="gateErr">✕ 등록되지 않은 ID입니다</div>
+    <div class="gate-note">인증 후 60일간 이 브라우저에서 유지됩니다</div>
+  </form>
+</div>
 
 <nav>
   <div class="nav-inner">
@@ -808,10 +852,47 @@ footer a:hover{text-decoration:underline}
 </main>
 
 <script>
-const io = new IntersectionObserver(es => {
-  es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-}, { threshold: .12 });
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+/* ---------- access gate ---------- */
+const AUTH_HASH = 'f533d4a0c61101b6d6af75164470182b7f380b156a8313bee807d8f876c7e9b3';
+const COOKIE = 'le_auth';
+const MAX_AGE = 60 * 60 * 24 * 60; /* 60일 ≈ 2달 */
+
+const getCookie = n => document.cookie.split('; ').find(c => c.startsWith(n + '='))?.split('=')[1];
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function unlock() {
+  document.getElementById('gate').classList.remove('show');
+  document.body.classList.add('unlocked');
+  initReveal();
+}
+
+(function init() {
+  if (getCookie(COOKIE) === AUTH_HASH) { unlock(); return; }
+  document.getElementById('gate').classList.add('show');
+  document.getElementById('gateForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const id = document.getElementById('gateId').value.trim().toLowerCase();
+    const hash = await sha256(id);
+    if (hash === AUTH_HASH) {
+      document.cookie = `${COOKIE}=${hash}; max-age=${MAX_AGE}; path=/; SameSite=Lax`;
+      unlock();
+    } else {
+      document.getElementById('gateErr').classList.add('show');
+    }
+  });
+})();
+
+/* ---------- scroll reveal ---------- */
+function initReveal() {
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: .12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+}
 </script>
 </body>
 </html>
