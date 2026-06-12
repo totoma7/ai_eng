@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>루프 엔지니어링 — 도식으로 배우기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0e14;
+  --ink-2:#0f1520;
+  --panel:#121a28;
+  --line:#22304a;
+  --line-soft:#1a2438;
+  --text:#d7e0ee;
+  --text-dim:#7d8ca3;
+  --amber:#ffb454;
+  --amber-deep:#e8851c;
+  --cyan:#5ccfe6;
+  --green:#87d96c;
+  --red:#f07178;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans KR',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.7;
+  overflow-x:hidden;
+}
+/* blueprint grid backdrop */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--line-soft) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+  background-size:56px 56px;
+  opacity:.35;
+  mask-image:radial-gradient(ellipse 90% 80% at 50% 0%,black 30%,transparent 80%);
+}
+main{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:0 28px}
+
+/* ---------- nav ---------- */
+nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(10,14,20,.88);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line-soft);
+}
+.nav-inner{max-width:1060px;margin:0 auto;padding:14px 28px;display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.nav-logo{font-family:var(--mono);font-weight:600;color:var(--amber);font-size:.85rem;letter-spacing:.08em}
+.nav-logo .blink{animation:blink 1.2s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+nav a{color:var(--text-dim);text-decoration:none;font-size:.8rem;font-family:var(--mono);transition:color .2s}
+nav a:hover{color:var(--amber)}
+
+/* ---------- hero ---------- */
+.hero{padding:90px 0 70px;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
+.kicker{font-family:var(--mono);font-size:.75rem;letter-spacing:.25em;color:var(--cyan);text-transform:uppercase;margin-bottom:18px}
+.kicker::before{content:'// '}
+h1{font-size:clamp(2.4rem,5.5vw,3.8rem);font-weight:700;line-height:1.15;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--amber)}
+.hero-sub{margin-top:22px;color:var(--text-dim);font-size:1.05rem;max-width:46ch}
+.formula{
+  margin-top:30px;display:inline-block;
+  font-family:var(--mono);font-size:1rem;
+  border:1px solid var(--line);background:var(--ink-2);
+  padding:14px 22px;border-radius:6px;
+  box-shadow:0 0 0 4px rgba(255,180,84,.04), inset 0 0 30px rgba(92,207,230,.04);
+}
+.formula b{color:var(--amber)}
+.formula i{color:var(--cyan);font-style:normal}
+
+/* hero loop ring */
+.ring-wrap{position:relative;width:300px;height:300px;margin:0 auto}
+.ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:1px dashed var(--line);
+}
+.ring::after{ /* glow arc */
+  content:'';position:absolute;inset:-1px;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0 70%,rgba(255,180,84,.55) 92%,var(--amber) 100%);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),black calc(100% - 2px));
+          mask:radial-gradient(farthest-side,transparent calc(100% - 3px),black calc(100% - 2px));
+  animation:spin 7s linear infinite;
+}
+.orbit{position:absolute;inset:0;animation:spin 7s linear infinite}
+.orbit .dot{
+  position:absolute;top:-7px;left:calc(50% - 7px);width:14px;height:14px;border-radius:50%;
+  background:var(--amber);box-shadow:0 0 18px 4px rgba(255,180,84,.6);
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ring-node{
+  position:absolute;font-family:var(--mono);font-size:.72rem;
+  background:var(--panel);border:1px solid var(--line);border-radius:5px;
+  padding:7px 12px;white-space:nowrap;color:var(--text);
+}
+.ring-node b{display:block;color:var(--cyan);font-size:.68rem;font-weight:500}
+.rn1{top:-14px;left:50%;transform:translateX(-50%)}
+.rn2{bottom:34px;right:-44px}
+.rn3{bottom:34px;left:-44px}
+.ring-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono);text-align:center;
+}
+.ring-center .big{font-size:1.5rem;color:var(--amber);font-weight:600}
+.ring-center .small{font-size:.68rem;color:var(--text-dim);margin-top:4px}
+
+/* ---------- sections ---------- */
+section{padding:74px 0;border-top:1px solid var(--line-soft)}
+.sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:14px}
+.sec-num{font-family:var(--mono);color:var(--amber);font-size:.85rem}
+h2{font-size:1.7rem;font-weight:700;letter-spacing:-.01em}
+.sec-desc{color:var(--text-dim);max-width:64ch;margin-bottom:40px}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ---------- 01 paradigm stairs ---------- */
+.stairs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:end}
+.stair{
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:22px;position:relative;
+}
+.stair .yr{font-family:var(--mono);font-size:.7rem;color:var(--text-dim)}
+.stair h3{font-size:1.05rem;margin:6px 0 8px}
+.stair p{font-size:.85rem;color:var(--text-dim)}
+.stair::after{
+  content:'→';position:absolute;right:-16px;top:50%;transform:translateY(-50%);
+  color:var(--amber);font-size:1.1rem;z-index:2;
+}
+.stair:last-child::after{content:none}
+.s1{min-height:150px}
+.s2{min-height:190px}
+.s3{min-height:230px;border-color:var(--amber-deep);box-shadow:0 0 26px rgba(255,180,84,.08)}
+.s3 h3{color:var(--amber)}
+.lever{font-family:var(--mono);font-size:.7rem;color:var(--cyan);margin-top:12px;display:block}
+.lever::before{content:'LEVERAGE: '}
+
+/* ---------- 02 anatomy ---------- */
+.anatomy{display:grid;grid-template-columns:340px 1fr;gap:48px;align-items:center}
+.cycle{position:relative;width:320px;height:320px}
+.cycle .track{position:absolute;inset:26px;border-radius:50%;border:1px dashed var(--line)}
+.cycle .runner{position:absolute;inset:26px;animation:spin 9s linear infinite}
+.cycle .runner i{
+  position:absolute;top:-6px;left:calc(50% - 6px);width:12px;height:12px;border-radius:50%;
+  background:var(--cyan);box-shadow:0 0 14px 3px rgba(92,207,230,.55);
+}
+.phase{
+  position:absolute;width:128px;text-align:center;
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 10px;
+}
+.phase b{display:block;font-size:.92rem}
+.phase span{font-family:var(--mono);font-size:.62rem;color:var(--text-dim)}
+.phase em{display:block;font-style:normal;font-size:.7rem;color:var(--text-dim);margin-top:4px}
+.p1{top:-12px;left:50%;transform:translateX(-50%);border-color:#3b5e8c}.p1 b{color:var(--cyan)}
+.p2{bottom:8px;right:-30px;border-color:#7c5a2e}.p2 b{color:var(--amber)}
+.p3{bottom:8px;left:-30px;border-color:#3f6b3a}.p3 b{color:var(--green)}
+.cycle-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:var(--mono)}
+.cycle-center span{font-size:.65rem;color:var(--text-dim)}
+.cycle-center b{color:var(--text);font-size:.8rem}
+.anatomy-notes{display:flex;flex-direction:column;gap:14px}
+.note{border-left:2px solid var(--line);padding:4px 0 4px 18px}
+.note.hot{border-color:var(--amber)}
+.note b{font-size:.92rem}
+.note p{font-size:.85rem;color:var(--text-dim)}
+.note code{font-family:var(--mono);font-size:.78rem;color:var(--cyan)}
+
+/* 5-stage pipeline */
+.pipeline{margin-top:54px;display:flex;align-items:stretch;gap:0;font-family:var(--mono)}
+.stage{
+  flex:1;background:var(--ink-2);border:1px solid var(--line);padding:16px 12px;text-align:center;position:relative;
+}
+.stage+.stage{margin-left:-1px}
+.stage b{display:block;font-size:.8rem;color:var(--text)}
+.stage span{font-size:.66rem;color:var(--text-dim);display:block;margin-top:6px;font-family:var(--sans)}
+.stage::after{
+  content:'▸';position:absolute;right:-7px;top:calc(50% - 12px);color:var(--amber);z-index:2;font-size:1rem;
+}
+.stage:last-child::after{content:none}
+.loopback{
+  font-family:var(--mono);font-size:.7rem;color:var(--text-dim);text-align:center;
+  border:1px dashed var(--line);border-top:none;border-radius:0 0 10px 10px;
+  padding:8px;margin:0 40px;
+}
+.loopback b{color:var(--amber)}
+
+/* verification split */
+.split{
+  margin-top:54px;display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:center;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:28px;
+}
+.agent-box{border:1px solid var(--line);border-radius:8px;padding:18px;background:var(--ink-2);text-align:center}
+.agent-box .tag{font-family:var(--mono);font-size:.65rem;letter-spacing:.15em;display:block;margin-bottom:6px}
+.worker .tag{color:var(--amber)}
+.grader .tag{color:var(--green)}
+.agent-box b{font-size:.95rem}
+.agent-box p{font-size:.78rem;color:var(--text-dim);margin-top:6px}
+.split-mid{font-family:var(--mono);font-size:.7rem;color:var(--text-dim);text-align:center}
+.split-mid .arrow{color:var(--cyan);font-size:1.2rem;display:block}
+.split-caption{grid-column:1/-1;text-align:center;font-size:.82rem;color:var(--text-dim);border-top:1px dashed var(--line);padding-top:16px}
+.split-caption b{color:var(--text)}
+
+/* ---------- 03 timeline ---------- */
+.timeline{position:relative;padding-left:36px}
+.timeline::before{content:'';position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--line),var(--amber))}
+.tl-item{position:relative;padding:0 0 36px}
+.tl-item::before{
+  content:'';position:absolute;left:-33px;top:8px;width:12px;height:12px;border-radius:50%;
+  background:var(--ink);border:2px solid var(--text-dim);
+}
+.tl-item.hot::before{border-color:var(--amber);background:var(--amber);box-shadow:0 0 14px rgba(255,180,84,.6)}
+.tl-date{font-family:var(--mono);font-size:.72rem;color:var(--cyan)}
+.tl-item h3{font-size:1.1rem;margin:2px 0 6px}
+.tl-item.hot h3{color:var(--amber)}
+.tl-item p{font-size:.88rem;color:var(--text-dim);max-width:62ch}
+.tl-item .who{font-family:var(--mono);font-size:.7rem;color:var(--text-dim)}
+
+/* ---------- 04 components ---------- */
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.comp{
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px;
+  position:relative;overflow:hidden;transition:transform .25s,border-color .25s;
+}
+.comp:hover{transform:translateY(-4px);border-color:var(--amber-deep)}
+.comp .idx{
+  position:absolute;top:12px;right:16px;font-family:var(--mono);font-size:1.6rem;
+  color:var(--line);font-weight:600;
+}
+.comp .role{font-family:var(--mono);font-size:.65rem;letter-spacing:.18em;color:var(--cyan)}
+.comp h3{font-size:1.05rem;margin:6px 0 8px}
+.comp p{font-size:.84rem;color:var(--text-dim)}
+.spine{
+  grid-column:1/-1;
+  border:1px solid var(--amber-deep);border-radius:10px;
+  background:linear-gradient(180deg,rgba(255,180,84,.07),transparent);
+  padding:22px 26px;display:flex;gap:22px;align-items:center;flex-wrap:wrap;
+}
+.spine .role{font-family:var(--mono);font-size:.65rem;letter-spacing:.18em;color:var(--amber)}
+.spine h3{font-size:1.05rem}
+.spine p{font-size:.84rem;color:var(--text-dim);flex:1;min-width:260px}
+
+/* orchestration flow */
+.flow{margin-top:60px}
+.flow-title{font-family:var(--mono);font-size:.75rem;color:var(--cyan);letter-spacing:.2em;margin-bottom:22px}
+.flow-title::before{content:'>> '}
+.flow-grid{display:flex;flex-direction:column;gap:0;font-size:.86rem}
+.frow{display:flex;gap:14px;align-items:stretch}
+.fbox{
+  flex:1;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;
+  padding:14px 18px;
+}
+.fbox b{font-size:.88rem}
+.fbox span{display:block;font-size:.76rem;color:var(--text-dim);margin-top:2px}
+.fbox.human{border-style:dashed;border-color:#6b4a7c}
+.fbox.human b{color:#c79bdd}
+.fbox.par{border-color:#3b5e8c}
+.fconn{display:flex;justify-content:center;padding:4px 0;color:var(--amber);font-family:var(--mono);font-size:.85rem}
+.fconn.label::after{content:attr(data-l);color:var(--text-dim);font-size:.68rem;margin-left:10px;align-self:center}
+.fpair{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1}
+.cycle-back{
+  text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--text-dim);
+  border:1px dashed var(--line);border-radius:8px;padding:10px;margin-top:14px;
+}
+.cycle-back b{color:var(--amber)}
+
+/* ---------- 05 guardrails / failures ---------- */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.gcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:26px}
+.gcard h3{font-size:1rem;font-family:var(--mono);letter-spacing:.06em;margin-bottom:18px}
+.gcard.ok h3{color:var(--green)}
+.gcard.bad h3{color:var(--red)}
+.gcard ul{list-style:none}
+.gcard li{
+  padding:10px 0;border-bottom:1px dashed var(--line-soft);font-size:.86rem;
+  display:flex;gap:12px;align-items:baseline;
+}
+.gcard li:last-child{border-bottom:none}
+.gcard.ok li::before{content:'✓';color:var(--green);font-family:var(--mono);flex:0 0 auto}
+.gcard.bad li::before{content:'✕';color:var(--red);font-family:var(--mono);flex:0 0 auto}
+.gcard li b{color:var(--text)}
+.gcard li span{color:var(--text-dim)}
+.cost-strip{
+  margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;text-align:center;
+}
+.cost{background:var(--ink-2);border:1px solid var(--line);border-radius:8px;padding:20px}
+.cost .n{font-family:var(--mono);font-size:1.9rem;color:var(--amber);font-weight:600}
+.cost p{font-size:.76rem;color:var(--text-dim);margin-top:4px}
+
+/* ---------- 06 risks ---------- */
+.risks{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.risk{
+  border:1px solid var(--line);border-radius:10px;padding:26px;background:var(--panel);
+  border-top:3px solid var(--red);
+}
+.risk .rn{font-family:var(--mono);font-size:.68rem;color:var(--red);letter-spacing:.2em}
+.risk h3{font-size:1rem;margin:8px 0}
+.risk p{font-size:.83rem;color:var(--text-dim)}
+.quote{
+  margin-top:48px;text-align:center;padding:48px 32px;
+  border:1px solid var(--line);border-radius:12px;
+  background:radial-gradient(ellipse 70% 120% at 50% 0%,rgba(255,180,84,.07),transparent);
+}
+.quote p{font-size:clamp(1.1rem,2.4vw,1.5rem);font-weight:600;max-width:30ch;margin:0 auto;line-height:1.6}
+.quote p em{font-style:normal;color:var(--amber)}
+.quote cite{display:block;margin-top:16px;font-family:var(--mono);font-size:.72rem;color:var(--text-dim);font-style:normal}
+
+/* roadmap */
+.steps{counter-reset:st;display:flex;flex-direction:column;gap:0;margin-top:8px}
+.step{
+  counter-increment:st;display:grid;grid-template-columns:54px 1fr auto;gap:18px;align-items:center;
+  padding:16px 0;border-bottom:1px dashed var(--line-soft);
+}
+.step::before{
+  content:counter(st,decimal-leading-zero);font-family:var(--mono);color:var(--amber);font-size:1.05rem;
+}
+.step b{font-size:.92rem}
+.step span{display:block;font-size:.78rem;color:var(--text-dim)}
+.step .learn{font-family:var(--mono);font-size:.68rem;color:var(--cyan);text-align:right}
+
+/* ---------- 07 harness stack ---------- */
+.stack{display:flex;flex-direction:column;gap:0;max-width:760px;margin:0 auto}
+.layer{
+  border:1px solid var(--line);background:var(--panel);
+  padding:24px 28px;display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:center;
+}
+.layer+.layer{margin-top:-1px}
+.layer.top{border-color:var(--amber-deep);border-radius:12px 12px 0 0;background:linear-gradient(180deg,rgba(255,180,84,.08),rgba(255,180,84,.02))}
+.layer.mid{border-color:#2e5e6e;background:linear-gradient(180deg,rgba(92,207,230,.06),transparent)}
+.layer.base{border-radius:0 0 12px 12px;background:var(--ink-2)}
+.layer .lname b{display:block;font-size:1.05rem}
+.layer.top .lname b{color:var(--amber)}
+.layer.mid .lname b{color:var(--cyan)}
+.layer.base .lname b{color:var(--text-dim)}
+.layer .lname span{font-family:var(--mono);font-size:.66rem;color:var(--text-dim);letter-spacing:.1em}
+.layer .lq{font-size:.82rem;color:var(--text);font-weight:600;margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{
+  font-family:var(--mono);font-size:.68rem;color:var(--text-dim);
+  border:1px solid var(--line);border-radius:99px;padding:3px 11px;background:var(--ink);
+}
+.layer.top .chip{border-color:#5e4a28;color:#e8c69a}
+.layer.mid .chip{border-color:#2e5e6e;color:#a3d8e4}
+.stack-note{
+  max-width:760px;margin:18px auto 0;text-align:center;
+  font-size:.82rem;color:var(--text-dim);
+}
+.stack-note b{color:var(--text)}
+.vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:54px}
+.vs{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:26px}
+.vs h3{font-family:var(--mono);font-size:.95rem;letter-spacing:.06em;margin-bottom:16px}
+.vs.harness h3{color:var(--cyan)}
+.vs.loop h3{color:var(--amber)}
+.vs dl{display:flex;flex-direction:column;gap:12px}
+.vs dt{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;color:var(--text-dim)}
+.vs dd{font-size:.84rem;margin:2px 0 0}
+.vs dd span{color:var(--text-dim)}
+.plane-strip{
+  margin-top:54px;background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:26px;
+}
+.plane-strip h3{font-family:var(--mono);font-size:.8rem;color:var(--cyan);letter-spacing:.15em;margin-bottom:16px}
+.planes{display:flex;flex-wrap:wrap;gap:8px}
+.plane{
+  font-family:var(--mono);font-size:.72rem;border:1px solid var(--line);border-radius:6px;
+  padding:8px 14px;color:var(--text-dim);background:var(--ink);
+}
+.plane.hot{border-color:var(--amber-deep);color:var(--amber)}
+.plane-strip p{margin-top:16px;font-size:.84rem;color:var(--text-dim)}
+.plane-strip p b{color:var(--text)}
+@media (max-width:880px){
+  .layer{grid-template-columns:1fr}
+  .vs-grid{grid-template-columns:1fr}
+}
+
+/* footer */
+footer{border-top:1px solid var(--line-soft);padding:48px 0 70px;color:var(--text-dim);font-size:.8rem}
+footer h4{font-family:var(--mono);font-size:.75rem;color:var(--text);letter-spacing:.15em;margin-bottom:14px}
+footer ul{list-style:none}
+footer li{padding:3px 0}
+footer a{color:var(--cyan);text-decoration:none}
+footer a:hover{text-decoration:underline}
+.stamp{margin-top:30px;font-family:var(--mono);font-size:.68rem;color:var(--text-dim)}
+
+/* responsive */
+@media (max-width:880px){
+  .hero{grid-template-columns:1fr;gap:60px}
+  .ring-wrap{transform:scale(.92)}
+  .anatomy{grid-template-columns:1fr;justify-items:center}
+  .stairs{grid-template-columns:1fr}
+  .stair{min-height:0!important}
+  .stair::after{content:'↓';right:auto;left:50%;top:auto;bottom:-18px;transform:translateX(-50%)}
+  .pipeline{flex-direction:column}
+  .stage::after{content:'▾';right:auto;left:calc(50% - 6px);top:auto;bottom:-9px}
+  .two-col,.risks,.cost-strip{grid-template-columns:1fr}
+  .split{grid-template-columns:1fr}
+  .split-mid .arrow{transform:rotate(90deg)}
+  .fpair{grid-template-columns:1fr}
+  .frow{flex-direction:column}
+  .cycle{transform:scale(.85)}
+}
+@media (prefers-reduced-motion:reduce){
+  .orbit,.ring::after,.runner{animation:none!important}
+  .reveal{opacity:1;transform:none;transition:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo">LOOP·ENG<span class="blink">_</span></span>
+    <a href="#paradigm">01 패러다임</a>
+    <a href="#anatomy">02 해부학</a>
+    <a href="#lineage">03 계보</a>
+    <a href="#components">04 구성요소</a>
+    <a href="#guardrails">05 가드레일</a>
+    <a href="#risks">06 리스크</a>
+    <a href="#harness">07 하네스</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div>
+    <p class="kicker">Loop Engineering · 2026 Field Notes</p>
+    <h1>프롬프트를 치지 마라.<br><em>루프를 설계하라.</em></h1>
+    <p class="hero-sub">
+      AI 에이전트에게 직접 명령하는 대신, 스스로 일을 발견하고 → 위임하고 →
+      검증하고 → 다음을 결정하는 <b>시스템</b>을 설계하는 새로운 엔지니어링 규율.
+    </p>
+    <div class="formula">루프 = <b>트리거</b> + <i>검증 가능한 목표</i></div>
+  </div>
+  <div class="ring-wrap" aria-label="수집-실행-검증 순환 다이어그램">
+    <div class="ring"></div>
+    <div class="orbit"><i class="dot"></i></div>
+    <div class="ring-node rn1"><b>GATHER</b>컨텍스트 수집</div>
+    <div class="ring-node rn2"><b>ACT</b>행동 실행</div>
+    <div class="ring-node rn3"><b>VERIFY</b>작업 검증</div>
+    <div class="ring-center">
+      <span class="big">∞</span>
+      <span class="small">until goal met</span>
+    </div>
+  </div>
+</header>
+
+<!-- ================= 01 PARADIGM ================= -->
+<section id="paradigm">
+  <div class="sec-head"><span class="sec-num">01</span><h2>패러다임의 이동 — 레버리지가 올라간다</h2></div>
+  <p class="sec-desc">
+    개입 지점이 "한 번의 요청"에서 "정보 공급"으로, 다시 "공급 시스템 그 자체"로 이동했다.
+    일이 쉬워진 게 아니라 <b>레버리지 포인트가 이동</b>했을 뿐이다.
+  </p>
+  <div class="stairs reveal">
+    <div class="stair s1">
+      <span class="yr">2022~</span>
+      <h3>프롬프트 엔지니어링</h3>
+      <p>한 번의 요청을 어떻게 잘 쓸 것인가. 사람이 에이전트의 손을 한 턴씩 잡고 이끈다.</p>
+      <span class="lever">개별 프롬프트</span>
+    </div>
+    <div class="stair s2">
+      <span class="yr">2024~</span>
+      <h3>컨텍스트 엔지니어링</h3>
+      <p>모델에게 어떤 정보를, 어떤 형태로 공급할 것인가. 입력의 질이 출력을 결정한다.</p>
+      <span class="lever">정보 공급 구조</span>
+    </div>
+    <div class="stair s3">
+      <span class="yr">2026~</span>
+      <h3>루프 엔지니어링</h3>
+      <p>프롬프트와 컨텍스트 공급 자체를 수행하는 시스템을 설계한다. "에이전트에게 프롬프트하는 사람"으로서의 나를 대체한다.</p>
+      <span class="lever">오케스트레이션</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 02 ANATOMY ================= -->
+<section id="anatomy">
+  <div class="sec-head"><span class="sec-num">02</span><h2>에이전트 루프의 해부학</h2></div>
+  <p class="sec-desc">
+    에이전트는 과업을 받으면 세 단계를 순환한다. 단계는 칼같이 나뉘지 않고 섞이며,
+    무엇이 필요한지는 <b>직전 단계에서 배운 것</b>으로 에이전트가 결정한다.
+  </p>
+
+  <div class="anatomy reveal">
+    <div class="cycle" aria-label="3단계 순환 모형">
+      <div class="track"></div>
+      <div class="runner"><i></i></div>
+      <div class="phase p1"><b>① 수집</b><span>GATHER CONTEXT</span><em>파일 검색 · 코드 읽기 · 기록 확인</em></div>
+      <div class="phase p2"><b>② 실행</b><span>TAKE ACTION</span><em>코드 수정 · 명령 실행 · API 호출</em></div>
+      <div class="phase p3"><b>③ 검증</b><span>VERIFY WORK</span><em>테스트 · 타입 체크 · 결과 확인</em></div>
+      <div class="cycle-center"><span>실패 시</span><b>오류 → 새 컨텍스트</b></div>
+    </div>
+    <div class="anatomy-notes">
+      <div class="note hot">
+        <b>피드백 없는 루프는 자기 동의일 뿐</b>
+        <p>밀어낼(push back) 것이 없으면 에이전트는 자신에게 동의한다. 테스트·타입·리뷰 게이트가 신뢰의 유일한 원천.</p>
+      </div>
+      <div class="note">
+        <b>LLM에는 '완료' 개념이 없다</b>
+        <p>검증 가능한 종료 조건이 없는 목표는 토큰 소각로가 된다. 목표가 추상적일수록 루프는 비싸고 예측 불가능해진다.</p>
+      </div>
+      <div class="note">
+        <b>종료는 태스크가 아니라 게이트로</b>
+        <p>"모든 태스크 완료"가 아니라 "모든 게이트 충족"이 계약. 태스크는 비계일 뿐이다. <code>tests ✓ coverage ✓ review ✓</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="pipeline reveal" aria-label="5단계 일반화 모형">
+    <div class="stage"><b>PERCEIVE</b><span>목표·도구 결과·오류 입력</span></div>
+    <div class="stage"><b>REASON</b><span>분석 · 격차 식별 · 선택지 비교</span></div>
+    <div class="stage"><b>PLAN</b><span>다음 행동 선택</span></div>
+    <div class="stage"><b>ACT</b><span>도구 호출 · 실행</span></div>
+    <div class="stage"><b>OBSERVE</b><span>결과 관찰 · 상태 갱신</span></div>
+  </div>
+  <div class="loopback">실패 → 재추론 · 성공 → 전진 · <b>종료 조건 충족 시에만 탈출</b></div>
+
+  <div class="split reveal" aria-label="검증자 분리 구조">
+    <div class="agent-box worker">
+      <span class="tag">WORKER</span>
+      <b>작업 에이전트</b>
+      <p>탐색하고 구현한다. 그러나 자기 완료를 선언할 수 없다.</p>
+    </div>
+    <div class="split-mid">
+      "done?"
+      <span class="arrow">⇄</span>
+      별도 채점
+    </div>
+    <div class="agent-box grader">
+      <span class="tag">EVALUATOR</span>
+      <b>평가자 모델</b>
+      <p>매 턴 끝에 목표 조건을 검사. 통과할 때만 루프를 멈춘다. (<code>/goal</code>의 구조)</p>
+    </div>
+    <div class="split-caption"><b>검증자 분리(Verification Split)</b> — 자기 숙제를 자기가 채점하지 않게 하라. "done"이 신뢰를 얻는 유일한 구조.</div>
+  </div>
+</section>
+
+<!-- ================= 03 LINEAGE ================= -->
+<section id="lineage">
+  <div class="sec-head"><span class="sec-num">03</span><h2>계보 — 4년의 진화</h2></div>
+  <p class="sec-desc">루프 엔지니어링은 갑자기 나온 게 아니다. 학술 → 대중 실증 → 실무자 혁신 → 네이티브 구현 → 체계화.</p>
+
+  <div class="timeline reveal">
+    <div class="tl-item">
+      <span class="tl-date">2022.10</span>
+      <h3>ReAct</h3>
+      <p>추론 흔적(reasoning trace)과 구체적 행동을 결합하는 패턴. 대부분의 프로덕션 에이전트의 기반이 됨.</p>
+      <span class="who">Princeton + Google Research</span>
+    </div>
+    <div class="tl-item">
+      <span class="tl-date">2023.03</span>
+      <h3>AutoGPT</h3>
+      <p>목표를 하위 작업으로 분해하고 도구를 사용. 개발자 수요를 최초로 실증했으나 무한 루프와 비용 폭발로 좌절.</p>
+    </div>
+    <div class="tl-item">
+      <span class="tl-date">2025.07</span>
+      <h3>Ralph Loop</h3>
+      <p>반복마다 컨텍스트 윈도를 <b>리셋</b>하고 상태는 파일시스템에 유지. 에이전트가 수정하고 종료하면 셸 스크립트가 새 컨텍스트로 재시작 — 컨텍스트 오버플로 문제의 실무적 해법.</p>
+      <span class="who">Geoffrey Huntley</span>
+    </div>
+    <div class="tl-item">
+      <span class="tl-date">2026 봄</span>
+      <h3>/goal · /loop</h3>
+      <p>Claude Code와 Codex CLI에 네이티브 루프 탑재. 별도 평가자 모델이 완료 조건을 검증하는 구조가 표준화.</p>
+    </div>
+    <div class="tl-item hot">
+      <span class="tl-date">2026.06.08</span>
+      <h3>루프 엔지니어링</h3>
+      <p>"코딩 에이전트에게 프롬프트하지 마라. 루프를 설계하라." (Steinberger, X 650만 뷰) ·
+      "내 일은 루프를 쓰는 것이다." (Cherny) · 다음 날 Osmani가 개념 체계화.
+      현재는 단일 루프를 넘어 <b>멀티 에이전트 감독</b>이 다음 레이어로 부상 중.</p>
+      <span class="who">Peter Steinberger · Boris Cherny · Addy Osmani</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 04 COMPONENTS ================= -->
+<section id="components">
+  <div class="sec-head"><span class="sec-num">04</span><h2>5대 구성요소 + 척추</h2></div>
+  <p class="sec-desc">Addy Osmani가 정리한 루프 엔지니어링의 빌딩 블록.</p>
+
+  <div class="comp-grid reveal">
+    <div class="comp"><span class="idx">01</span>
+      <span class="role">HEARTBEAT</span><h3>자동화 (Automations)</h3>
+      <p>주기적 스케줄 태스크가 일을 발견하고 트리아지. 사람이 확인하러 가는 게 아니라 작업이 인박스로 올라온다. <code>/loop</code> · <code>/goal</code></p>
+    </div>
+    <div class="comp"><span class="idx">02</span>
+      <span class="role">ISOLATION</span><h3>워크트리 (Worktrees)</h3>
+      <p>git worktree로 작업 디렉토리를 분리. 여러 에이전트가 파일 충돌 없이 동시 작업한다.</p>
+    </div>
+    <div class="comp"><span class="idx">03</span>
+      <span class="role">KNOWLEDGE</span><h3>스킬 (Skills)</h3>
+      <p>SKILL.md로 묶인 재사용 지시 패키지. 컨벤션·빌드 절차를 인코딩해 매 실행마다 같은 설명을 반복할 필요를 제거.</p>
+    </div>
+    <div class="comp"><span class="idx">04</span>
+      <span class="role">INTEGRATION</span><h3>플러그인 & 커넥터</h3>
+      <p>MCP 기반으로 이슈 트래커·DB·Slack과 연동. 루프를 '제안자'에서 PR 열고 티켓 갱신하는 <b>실제 참여자</b>로 전환.</p>
+    </div>
+    <div class="comp"><span class="idx">05</span>
+      <span class="role">SEPARATION</span><h3>서브에이전트</h3>
+      <p>구현 에이전트와 검증 에이전트를 분리. "자기 숙제 자기 채점" 방지. 역할별로 다른 모델·노력 수준 배정 가능.</p>
+    </div>
+    <div class="spine">
+      <div><span class="role">SPINE — 척추</span><h3>외부 메모리</h3></div>
+      <p>대화 밖에 존재하는 마크다운 파일이나 보드. 모델은 실행 사이에 잊어버리므로, 영속 상태가 완료된 일과 다음 단계를 기억한다. 다음 실행은 이전 상태에서 이어간다.</p>
+    </div>
+  </div>
+
+  <!-- orchestration flow -->
+  <div class="flow reveal">
+    <p class="flow-title">ORCHESTRATION LOOP — 하루의 실행 예시</p>
+    <div class="flow-grid">
+      <div class="frow"><div class="fbox"><b>🌅 아침 자동화 트리거</b><span>트리아지 스킬이 CI 실패 · 열린 이슈 · 최근 커밋을 읽음</span></div></div>
+      <div class="fconn label" data-l="발견 사항 기록">▼</div>
+      <div class="frow"><div class="fbox"><b>📝 영속 상태 파일</b><span>외부 메모리에 발견 사항 기록 — 루프의 척추</span></div></div>
+      <div class="fconn label" data-l="실행 가능 항목마다 worktree 격리">▼</div>
+      <div class="frow">
+        <div class="fpair">
+          <div class="fbox par"><b>🔧 에이전트 A — 작업자</b><span>격리된 worktree에서 수정안 작성</span></div>
+          <div class="fbox par"><b>🔍 에이전트 B — 리뷰어</b><span>프로젝트 스킬·테스트 기준으로 검증</span></div>
+        </div>
+      </div>
+      <div class="fconn label" data-l="게이트 통과 시">▼</div>
+      <div class="frow">
+        <div class="fpair">
+          <div class="fbox"><b>🔗 커넥터</b><span>PR 열기 · 티켓 갱신 · 알림 발송</span></div>
+          <div class="fbox human"><b>👤 트리아지 인박스</b><span>처리 못 한 항목 → 사람이 리뷰 (휴먼 체크포인트)</span></div>
+        </div>
+      </div>
+      <div class="cycle-back">↻ 다음 날 아침 실행은 <b>이전 상태에서 이어간다</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 05 GUARDRAILS ================= -->
+<section id="guardrails">
+  <div class="sec-head"><span class="sec-num">05</span><h2>가드레일 vs 실패 모드</h2></div>
+  <p class="sec-desc">"목표는 자율성을 없애는 게 아니라 <b>경계 짓는(bound)</b> 것이다."</p>
+
+  <div class="two-col reveal">
+    <div class="gcard ok">
+      <h3>GUARDRAILS — 필수 장치</h3>
+      <ul>
+        <li><div><b>반복 상한</b> <span>— 최대 사이클 수 하드 캡</span></div></li>
+        <li><div><b>토큰/달러 예산</b> <span>— 실행 전에 설정</span></div></li>
+        <li><div><b>무진행 감지</b> <span>— 상태가 안 변하면 탈출</span></div></li>
+        <li><div><b>자동 검증 기준</b> <span>— 테스트·커버리지·타입 체크</span></div></li>
+        <li><div><b>타임아웃</b> <span>— 도구 호출 단위 + 태스크 단위</span></div></li>
+        <li><div><b>서킷 브레이커</b> <span>— 도구 재시도 폭주 차단</span></div></li>
+        <li><div><b>휴먼 체크포인트</b> <span>— 머지·배포·삭제 전 사람 승인</span></div></li>
+      </ul>
+    </div>
+    <div class="gcard bad">
+      <h3>FAILURE MODES — 실패 도감</h3>
+      <ul>
+        <li><div><b>무한 루프</b> <span>— 멈출 조건 없이 계속 다듬음</span></div></li>
+        <li><div><b>목표 표류</b> <span>— 모호한 명세 → 곁가지 추구</span></div></li>
+        <li><div><b>컨텍스트 오버플로</b> <span>— 긴 세션이 추론 품질 저하</span></div></li>
+        <li><div><b>침묵 실패</b> <span>— 도구는 도는데 진전은 없음</span></div></li>
+        <li><div><b>토큰 폭발</b> <span>— 사례: 5분에 중복 호출 400회</span></div></li>
+        <li><div><b>진행 환각</b> <span>— "done"은 주장이지 증명이 아니다</span></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="cost-strip reveal">
+    <div class="cost"><div class="n">×4</div><p>단일 에이전트 루프의 토큰 소모 (일반 채팅 대비)</p></div>
+    <div class="cost"><div class="n">×15</div><p>멀티 에이전트 오케스트레이션의 토큰 소모</p></div>
+    <div class="cost"><div class="n">13M</div><p>25시간 무중단 실험의 토큰 — 3만 줄 코드 산출</p></div>
+  </div>
+</section>
+
+<!-- ================= 06 RISKS ================= -->
+<section id="risks">
+  <div class="sec-head"><span class="sec-num">06</span><h2>세 가지 본질적 리스크</h2></div>
+  <p class="sec-desc">루프가 잘 돌수록 위험해지는 것들.</p>
+
+  <div class="risks reveal">
+    <div class="risk">
+      <span class="rn">RISK 01</span>
+      <h3>검증은 끝까지 당신 책임</h3>
+      <p>방치된 루프는 방치된 채로 실수한다. 자동 게이트가 검사하지 않는 영역은 결국 사람이 본다.</p>
+    </div>
+    <div class="risk">
+      <span class="rn">RISK 02</span>
+      <h3>이해 부채 (Comprehension Debt)</h3>
+      <p>코드가 이해 속도보다 빠르게 출하되면 '존재하는 것'과 '파악한 것'의 격차가 벌어진다. 루프 출력을 읽는 것은 타협 불가.</p>
+    </div>
+    <div class="risk">
+      <span class="rn">RISK 03</span>
+      <h3>인지적 항복 (Cognitive Surrender)</h3>
+      <p>같은 루프를 가진 두 엔지니어가 정반대 결과를 얻는다 — 한 명은 깊이 이해하고, 한 명은 생각을 회피한다. 루프는 어느 쪽인지 모른다.</p>
+    </div>
+  </div>
+
+  <div class="quote reveal">
+    <p>"루프를 만들어라. 단, <em>엔지니어로 남을 사람</em>처럼 만들어라.<br>'실행 버튼만 누르는 사람'이 아니라."</p>
+    <cite>— Addy Osmani, Loop Engineering (2026)</cite>
+  </div>
+
+  <h2 style="margin-top:70px;font-size:1.3rem">실습 로드맵</h2>
+  <div class="steps reveal">
+    <div class="step"><div><b>루프 관찰</b><span>에이전트에 단일 과업을 주고 수집→실행→검증 순환을 지켜본다</span></div><span class="learn">루프의 리듬</span></div>
+    <div class="step"><div><b>검증 게이트 추가</b><span>"테스트가 통과할 때까지"처럼 검증 가능한 목표를 명세한다</span></div><span class="learn">종료 조건 설계</span></div>
+    <div class="step"><div><b>단순 반복 루프</b><span>/goal · /loop 또는 셸 스크립트로 ralph식 루프를 구성한다</span></div><span class="learn">트리거 + 외부 메모리</span></div>
+    <div class="step"><div><b>서브에이전트 분리</b><span>작업자와 리뷰어 역할을 나눈다</span></div><span class="learn">검증 분리</span></div>
+    <div class="step"><div><b>오케스트레이션</b><span>worktree 병렬화 + MCP 커넥터로 풀 루프를 구축한다</span></div><span class="learn">멀티 에이전트 감독</span></div>
+    <div class="step"><div><b>가드레일 계측</b><span>예산 · 상한 · 무진행 감지 · 휴먼 체크포인트를 단다</span></div><span class="learn">프로덕션 운영</span></div>
+  </div>
+</section>
+
+<!-- ================= 07 HARNESS ================= -->
+<section id="harness">
+  <div class="sec-head"><span class="sec-num">07</span><h2>부록 — 하네스 vs 루프</h2></div>
+  <p class="sec-desc">
+    하네스가 <b>공장 설비</b>(작업대·공구함·안전 펜스·CCTV)라면,
+    루프는 <b>생산 스케줄과 품질 검수 프로세스</b>다. 경쟁 개념이 아니라 스택의 상하층.
+  </p>
+
+  <div class="stack reveal" aria-label="루프-하네스-모델 레이어 스택">
+    <div class="layer top">
+      <div class="lname"><b>루프 엔지니어링</b><span>WHEN · WHY · UNTIL</span></div>
+      <div>
+        <p class="lq">"누가 일을 발견하고, 언제 멈추고, 누가 검증할까?"</p>
+        <div class="chips">
+          <span class="chip">트리거 /loop·cron</span><span class="chip">검증 가능한 목표</span>
+          <span class="chip">종료 게이트</span><span class="chip">평가자 분리</span>
+          <span class="chip">외부 메모리</span><span class="chip">반복·예산 상한</span>
+        </div>
+      </div>
+    </div>
+    <div class="layer mid">
+      <div class="lname"><b>하네스 엔지니어링</b><span>WHAT · HOW FAR</span></div>
+      <div>
+        <p class="lq">"에이전트에게 무엇을 쥐여주고 어디까지 허용할까?"</p>
+        <div class="chips">
+          <span class="chip">도구 표면</span><span class="chip">샌드박스·권한</span>
+          <span class="chip">컨텍스트 정책 (스킬)</span><span class="chip">커넥터 MCP</span>
+          <span class="chip">워크트리 격리</span><span class="chip">관측성</span><span class="chip">모델 라우팅</span>
+        </div>
+      </div>
+    </div>
+    <div class="layer base">
+      <div class="lname"><b>모델 (LLM)</b><span>REASONING</span></div>
+      <div><p class="lq" style="margin:0">"추론 능력" — 같은 모델이라도 위 두 레이어의 설계가 결과를 가른다.</p></div>
+    </div>
+  </div>
+  <p class="stack-note">
+    하네스는 루프가 돌 수 있는 <b>능력과 한계</b>를 정의하고,<br>
+    루프 엔지니어링은 그 능력을 <b>목표 달성 시스템으로 조립</b>한다.
+  </p>
+
+  <div class="vs-grid reveal">
+    <div class="vs harness">
+      <h3>HARNESS — 작업장</h3>
+      <dl>
+        <dt>실패하면</dt><dd>엉뚱한 도구 사용 · 위험한 행동 · 컨텍스트 오염</dd>
+        <dt>시간 단위</dt><dd>한 번의 실행(run) <b>내부</b>의 품질</dd>
+        <dt>계보</dt><dd><span>컨텍스트 엔지니어링의 다음 진화</span></dd>
+      </dl>
+    </div>
+    <div class="vs loop">
+      <h3>LOOP — 운영 체계</h3>
+      <dl>
+        <dt>실패하면</dt><dd>무한 루프 · 목표 표류 · 진행 환각 · 토큰 폭발</dd>
+        <dt>시간 단위</dt><dd>실행과 실행 <b>사이</b>를 잇는 연속성</dd>
+        <dt>계보</dt><dd><span>프롬프트 → 컨텍스트 → 루프로 이어지는 다음 단계</span></dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="plane-strip reveal">
+    <h3>7-PLANE HARNESS FRAMEWORK</h3>
+    <div class="planes">
+      <span class="plane hot">① 루프 정책</span>
+      <span class="plane">② 도구 표면</span>
+      <span class="plane">③ 컨텍스트</span>
+      <span class="plane">④ 샌드박스</span>
+      <span class="plane">⑤ 멀티 에이전트 라우팅</span>
+      <span class="plane">⑥ 관측성</span>
+      <span class="plane">⑦ 모델 라우팅</span>
+    </div>
+    <p>경계는 칼같지 않다 — <b>"루프 정책"이 하네스의 한 평면으로 포함</b>된다.
+    같은 하네스 위에서도 루프 설계에 따라 결과가 갈리고,
+    좋은 루프도 부실한 하네스 위에서는 신뢰할 수 없다.</p>
+  </div>
+</section>
+
+<footer>
+  <h4>SOURCES</h4>
+  <ul>
+    <li><a href="https://addyo.substack.com/p/loop-engineering">Loop Engineering — Addy Osmani</a> (1차 문헌)</li>
+    <li><a href="https://datasciencedojo.com/blog/agentic-loops-explained-from-react-to-loop-engineering-2026-guide/">Agentic Loops: From ReAct to Loop Engineering — Data Science Dojo</a></li>
+    <li><a href="https://code.claude.com/docs/en/how-claude-code-works">How Claude Code works — Claude Code Docs</a></li>
+    <li><a href="https://www.mindstudio.ai/blog/what-is-loop-engineering-ai-coding-agents">What Is Loop Engineering? — MindStudio</a></li>
+    <li><a href="https://explainx.ai/blog/loop-engineering-coding-agents-claude-code-guide-2026">Loop Engineering 2026 Guide — explainx.ai</a></li>
+    <li><a href="https://blogs.oracle.com/developers/what-is-the-ai-agent-loop-the-core-architecture-behind-autonomous-ai-systems">What Is the AI Agent Loop? — Oracle Developers</a></li>
+  </ul>
+  <p class="stamp">LOOP·ENG FIELD NOTES — 2026.06.13 · 마크다운 학습 노트: <a href="README.md">README.md</a> · 부록: <a href="06-하네스와-루프.md">06-하네스와-루프.md</a></p>
+</footer>
+
+</main>
+
+<script>
+const io = new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: .12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
