@@ -26,6 +26,11 @@ AI 에이전트 시대의 엔지니어링 기법을 주제별로 리서치하고
 | [5장. 리스크와 실천 가이드](docs/loop-engineering/05-리스크와-실천-가이드.md) | 이해 부채, 인지적 항복, 6단계 실습 로드맵 |
 | [부록. 하네스와 루프](docs/loop-engineering/06-하네스와-루프.md) | 하네스 엔지니어링 vs 루프 엔지니어링, 7-plane 프레임워크 |
 | [부록. 자바 프레임워크 비교](docs/loop-engineering/07-자바-프레임워크-비교.md) | 진화 단계별 차이를 LangChain4j vs Spring AI 코드로 비교 |
+| [심화 8. 하네스 엔지니어링](docs/loop-engineering/08-하네스-엔지니어링-심화.md) | Agent = Model + Harness, 5계층, 구속 제약 논제, 메트릭 |
+| [심화 9. 에이전트 Evals 설계](docs/loop-engineering/09-에이전트-Evals-설계.md) | 5단계 설계법, 60/30/10 채점기 믹스, 하네스 evals |
+| [심화 10. 멀티 에이전트 감독](docs/loop-engineering/10-멀티-에이전트-감독.md) | 스웜의 후퇴, 수퍼바이저 패턴, PEV 루프 |
+| [심화 11. Human-in-the-Loop](docs/loop-engineering/11-Human-in-the-Loop.md) | HiL-Bench, ask_human() 설계, in/on/above-the-loop |
+| [심화 12. 환경 엔지니어링](docs/loop-engineering/12-환경-엔지니어링.md) | AI-legible 시스템, 자기 개선 하네스, 총정리 |
 
 **🎨 [인터랙티브 도식화 페이지](https://totoma7.github.io/ai_eng/docs/loop-engineering/)**
 — 전체 내용을 한 장의 다이어그램으로 정리한 HTML 버전 (GitHub Pages).
