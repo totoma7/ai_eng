@@ -2,6 +2,10 @@
 
 AI 에이전트 시대의 엔지니어링 기법을 주제별로 리서치하고 한국어로 정리하는 저장소입니다.
 
+> 🌐 **바로가기**: [인터랙티브 도식화 페이지](https://totoma7.github.io/ai_eng/docs/loop-engineering/) ·
+> [사이트 루트](https://totoma7.github.io/ai_eng/) ·
+> [실습 가이드](practice/ralph-loop/README.md)
+
 > 프롬프트 엔지니어링(2022) → 컨텍스트 엔지니어링(2024) → **루프 엔지니어링(2026)**
 > 개입 지점이 "한 번의 요청"에서 "정보 공급"으로, 다시 "공급 시스템 그 자체"로 올라가는 흐름을 따라갑니다.
 
@@ -23,8 +27,10 @@ AI 에이전트 시대의 엔지니어링 기법을 주제별로 리서치하고
 | [부록. 하네스와 루프](docs/loop-engineering/06-하네스와-루프.md) | 하네스 엔지니어링 vs 루프 엔지니어링, 7-plane 프레임워크 |
 | [부록. 자바 프레임워크 비교](docs/loop-engineering/07-자바-프레임워크-비교.md) | 진화 단계별 차이를 LangChain4j vs Spring AI 코드로 비교 |
 
-**🎨 [인터랙티브 도식화 페이지 (index.html)](docs/loop-engineering/index.html)**
-— 전체 내용을 한 장의 다이어그램으로 정리한 HTML 버전. 로컬에서 열거나(`open docs/loop-engineering/index.html`) GitHub Pages로 서빙해서 볼 수 있습니다.
+**🎨 [인터랙티브 도식화 페이지](https://totoma7.github.io/ai_eng/docs/loop-engineering/)**
+— 전체 내용을 한 장의 다이어그램으로 정리한 HTML 버전 (GitHub Pages).
+페이지 하단 "08 전체 문서" 섹션에서 모든 챕터·실습으로 이동할 수 있습니다.
+로컬 실행: `open docs/loop-engineering/index.html`
 
 ## 🛠 실습 (Practice)
 

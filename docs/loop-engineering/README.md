@@ -8,8 +8,12 @@
 
 ## 도식화 페이지
 
-전체 내용을 한 장의 인터랙티브 다이어그램으로 정리한 HTML 버전: **[index.html](index.html)**
-(브라우저에서 열기: `open docs/loop-engineering/index.html` 또는 `python3 -m http.server`로 서빙)
+전체 내용을 한 장의 인터랙티브 다이어그램으로 정리한 HTML 버전:
+
+- 🌐 **웹**: https://totoma7.github.io/ai_eng/docs/loop-engineering/ (GitHub Pages)
+- 💻 **로컬**: `open docs/loop-engineering/index.html` 또는 `python3 -m http.server`로 서빙
+
+페이지 하단 "08 전체 문서(Library)" 섹션에서 모든 챕터와 실습으로 이동할 수 있다.
 
 ## 목차
 
