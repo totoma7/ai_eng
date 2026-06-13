@@ -21,6 +21,7 @@ AI 에이전트 시대의 엔지니어링 기법을 주제별로 리서치하고
 | [4장. 실전 구성요소와 가드레일](docs/loop-engineering/04-실전-구성요소와-가드레일.md) | 5대 구성요소 + 외부 메모리, 종료 전략, 실패 모드 |
 | [5장. 리스크와 실천 가이드](docs/loop-engineering/05-리스크와-실천-가이드.md) | 이해 부채, 인지적 항복, 6단계 실습 로드맵 |
 | [부록. 하네스와 루프](docs/loop-engineering/06-하네스와-루프.md) | 하네스 엔지니어링 vs 루프 엔지니어링, 7-plane 프레임워크 |
+| [부록. 자바 프레임워크 비교](docs/loop-engineering/07-자바-프레임워크-비교.md) | 진화 단계별 차이를 LangChain4j vs Spring AI 코드로 비교 |
 
 **🎨 [인터랙티브 도식화 페이지 (index.html)](docs/loop-engineering/index.html)**
 — 전체 내용을 한 장의 다이어그램으로 정리한 HTML 버전. 로컬에서 열거나(`open docs/loop-engineering/index.html`) GitHub Pages로 서빙해서 볼 수 있습니다.

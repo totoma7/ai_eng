@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "enabled": true,
+  "teamName": "",
+  "feature": "sample",
+  "pdcaPhase": "do",
+  "orchestrationPattern": "leader",
+  "ctoAgent": "opus",
+  "startedAt": "2026-06-12T23:59:40.364Z",
+  "lastUpdated": "2026-06-13T00:06:31.069Z",
+  "teammates": [
+    {
+      "name": "a2c1698220c9c2579",
+      "role": "oh-my-claudecode:architect",
+      "model": "sonnet",
+      "status": "completed",
+      "currentTask": null,
+      "taskId": null,
+      "startedAt": "2026-06-12T23:59:40.364Z",
+      "lastActivityAt": "2026-06-13T00:04:14.257Z"
+    },
+    {
+      "name": "ab6ba4a12251ec8d7",
+      "role": "oh-my-claudecode:critic",
+      "model": "sonnet",
+      "status": "completed",
+      "currentTask": null,
+      "taskId": null,
+      "startedAt": "2026-06-13T00:04:42.047Z",
+      "lastActivityAt": "2026-06-13T00:06:31.068Z"
+    }
+  ],
+  "progress": {
+    "totalTasks": 0,
+    "completedTasks": 0,
+    "inProgressTasks": 0,
+    "failedTasks": 0,
+    "pendingTasks": 0
+  },
+  "recentMessages": [],
+  "sessionId": "33e5fd41-0e4f-4c85-b7c2-a3666c652870"
+}
